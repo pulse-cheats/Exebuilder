@@ -23,6 +23,7 @@ TEXT = "#f3eee7"
 MUTED = "#aaa39a"
 GREEN = "#83c98a"
 
+
 class NukeTweaker:
     def __init__(self, root):
         self.root = root
@@ -49,11 +50,18 @@ class NukeTweaker:
         header = tk.Frame(self.root, bg=BG, height=230)
         header.pack(fill="x", padx=18, pady=(18, 10))
         header.pack_propagate(False)
-        banner_path = Path(__file__).with_name("banner.jpg")
+
+        if getattr(sys, "frozen", False):
+            base_dir = Path(sys._MEIPASS)
+        else:
+            base_dir = Path(__file__).resolve().parent
+        banner_path = base_dir / "banner.jpg"
+
         if PIL_AVAILABLE and banner_path.exists():
             try:
                 im = Image.open(banner_path)
-                im.thumbnail((1500, 320), Image.Resampling.LANCZOS)
+                resample = getattr(Image, "Resampling", Image).LANCZOS
+                im.thumbnail((1500, 320), resample)
                 self.banner_photo = ImageTk.PhotoImage(im)
                 tk.Label(header, image=self.banner_photo, bg=BG, bd=0).pack(fill="both", expand=True)
             except Exception:
@@ -230,10 +238,12 @@ class NukeTweaker:
         self._log("All selected tasks finished.")
         messagebox.showinfo(APP_NAME, "Finished. Review the log for results and skipped files.")
 
+
 def main():
     root = tk.Tk()
     NukeTweaker(root)
     root.mainloop()
+
 
 if __name__ == "__main__":
     main()
